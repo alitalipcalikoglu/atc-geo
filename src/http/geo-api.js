@@ -52,6 +52,14 @@ export class GeoApi {
   }
 
   /** @returns {Promise<FastifyInstance>} */
+  /** Age of the IP database for `/ready`: it stays ready when old (a stale database still answers), but says so. */
+  #ipDatabaseState() {
+    const info = this.ipLookup.info();
+    if (!info.loaded || !info.city) return { configured: info.configured, loaded: false, builtAt: null, ageDays: null, stale: false };
+    const ageDays = Math.floor((Date.now() - info.city.buildEpoch * 1000) / 86_400_000);
+    return { configured: true, loaded: true, builtAt: info.city.builtAt, ageDays, stale: this.config.mmdbMaxAgeDays > 0 && ageDays > this.config.mmdbMaxAgeDays };
+  }
+
   async build() {
     const { config } = this;
     const app = Fastify({
@@ -76,7 +84,7 @@ export class GeoApi {
     const { invalidate } = registerProbes(app, () => {
       this.db.ping();
       if (this.ipLookup.paths.mmdbPath && !this.ipLookup.available) throw new Error(`IP database not loaded: ${this.ipLookup.loadError ?? 'unknown'}`);
-    }, { cacheMs: GeoApi.READY_CACHE_MS });
+    }, { cacheMs: GeoApi.READY_CACHE_MS, extra: () => ({ ipDatabase: this.#ipDatabaseState() }) });
     this.invalidateReady = invalidate;
     registerOpenApi(app, new URL('../../openapi.yaml', import.meta.url));
     registerInfo(app, {
@@ -203,6 +211,9 @@ export class GeoApi {
         '# HELP geo_database_build_epoch Build time of the loaded IP database, seconds since epoch (0 when none).',
         '# TYPE geo_database_build_epoch gauge',
         `geo_database_build_epoch ${info.city?.buildEpoch ?? 0}`,
+        '# HELP geo_database_stale 1 when the IP database is older than MMDB_MAX_AGE_DAYS.',
+        '# TYPE geo_database_stale gauge',
+        `geo_database_stale ${this.#ipDatabaseState().stale ? 1 : 0}`,
         '# HELP geo_collections Place collections.',
         '# TYPE geo_collections gauge',
         `geo_collections ${this.collections.all().length}`,

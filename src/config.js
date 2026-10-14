@@ -22,6 +22,7 @@ export class Config {
     this.dbPath = v.dbPath;
     this.dbBackupDir = v.dbBackupDir;
     this.mmdbPath = v.mmdbPath;
+    this.mmdbMaxAgeDays = v.mmdbMaxAgeDays;
     this.asnMmdbPath = v.asnMmdbPath;
     this.mmdbSha256 = v.mmdbSha256;
     this.asnMmdbSha256 = v.asnMmdbSha256;
@@ -56,6 +57,7 @@ export class Config {
       dbPath: r.optional('DB_PATH') || './data/geo.db',
       dbBackupDir: r.optional('DB_BACKUP_DIR') || undefined,
       mmdbPath: r.optional('MMDB_PATH'),
+      mmdbMaxAgeDays: r.integer('MMDB_MAX_AGE_DAYS', 60, { min: 0, max: 3650 }),
       asnMmdbPath: r.optional('ASN_MMDB_PATH'),
       mmdbSha256: Config.#parseSha256(r.optional('MMDB_SHA256'), 'MMDB_SHA256'),
       asnMmdbSha256: Config.#parseSha256(r.optional('ASN_MMDB_SHA256'), 'ASN_MMDB_SHA256'),

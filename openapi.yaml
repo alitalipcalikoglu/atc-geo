@@ -1529,6 +1529,15 @@ components:
         status:
           type: string
           enum: [ok, unavailable]
+        ipDatabase:
+          type: object
+          description: State of the IP database (present when ready). A stale database keeps answering; the flag is for you.
+          properties:
+            configured: { type: boolean }
+            loaded: { type: boolean }
+            builtAt: { type: [string, "null"], format: date-time }
+            ageDays: { type: [integer, "null"], description: Days since the database was built. }
+            stale: { type: boolean, description: "True when ageDays exceeds MMDB_MAX_AGE_DAYS (0 = never)." }
         error:
           type: string
           description: Present only when status is "unavailable".

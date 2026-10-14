@@ -23,6 +23,7 @@
  * @property {number} bodyLimit
  * @property {string} dbPath
  * @property {string} [dbBackupDir]
+ * @property {number} mmdbMaxAgeDays   `/ready` reports the IP database as stale beyond this age (days since its build); 0 = never.
  * @property {string} mmdbPath        City or country database; empty = no IP geolocation.
  * @property {string} asnMmdbPath     Optional ASN database.
  * @property {string|null} mmdbSha256     Expected SHA-256 of `mmdbPath`'s bytes; null = not checked.

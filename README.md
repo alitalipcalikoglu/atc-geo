@@ -81,7 +81,7 @@ Scenario walkthroughs for every feature live in [examples/](examples/README.md).
 
 ## Configuration
 
-Environment only; see [.env.example](.env.example). Required: `GEO_API_KEYS`. IP geolocation needs `MMDB_PATH` (and optionally `ASN_MMDB_PATH`); see [examples/ip-databases.md](examples/ip-databases.md) for free databases. Notable: `MMDB_SHA256` / `ASN_MMDB_SHA256` (optional checksum verification, see "Security notes"), `DEFAULT_LANG`, `MAX_BATCH`, `MAX_POINTS`, `MAX_RADIUS_KM`, `RATE_LIMIT_MAX`, `TRUST_PROXY` (needed for `/v1/ip/self` behind a proxy), `TLS_CERT_PATH` / `TLS_KEY_PATH`.
+Environment only; see [.env.example](.env.example). Required: `GEO_API_KEYS`. IP geolocation needs `MMDB_PATH` (and optionally `ASN_MMDB_PATH`); see [examples/ip-databases.md](examples/ip-databases.md) for free databases. Notable: `MMDB_MAX_AGE_DAYS` (default 60; `/ready` shows `ipDatabase.ageDays` and `stale`, `/metrics` has `geo_database_stale`), `MMDB_SHA256` / `ASN_MMDB_SHA256` (optional checksum verification, see "Security notes"), `DEFAULT_LANG`, `MAX_BATCH`, `MAX_POINTS`, `MAX_RADIUS_KM`, `RATE_LIMIT_MAX`, `TRUST_PROXY` (needed for `/v1/ip/self` behind a proxy), `TLS_CERT_PATH` / `TLS_KEY_PATH`.
 
 ## Security notes
 

@@ -145,3 +145,18 @@ test('API: /v1/info', async (t) => {
     serviceCore: body.serviceCore,
   });
 });
+
+test('API: /ready reports the age of the IP database and whether it is stale, without failing readiness; /metrics has the flag', async (t) => {
+  const old = await buildApp({ MMDB_PATH: 'city.mmdb', MMDB_MAX_AGE_DAYS: '60' });
+  t.after(() => old.app.close());
+  const ready = json(await old.app.inject({ url: '/ready' }));
+  assert.equal(ready.status, 'ok');
+  assert.deepEqual([ready.ipDatabase.loaded, ready.ipDatabase.stale, ready.ipDatabase.ageDays > 60, typeof ready.ipDatabase.builtAt], [true, true, true, 'string']);
+  assert.match((await old.app.inject({ url: '/metrics', headers: bearer(READ_KEY) })).body, /geo_database_stale 1/);
+  const unchecked = await buildApp({ MMDB_PATH: 'city.mmdb', MMDB_MAX_AGE_DAYS: '0' });
+  t.after(() => unchecked.app.close());
+  assert.equal(json(await unchecked.app.inject({ url: '/ready' })).ipDatabase.stale, false, '0 switches the check off');
+  const none = await buildApp({ MMDB_PATH: '' });
+  t.after(() => none.app.close());
+  assert.deepEqual(json(await none.app.inject({ url: '/ready' })).ipDatabase, { configured: false, loaded: false, builtAt: null, ageDays: null, stale: false });
+});

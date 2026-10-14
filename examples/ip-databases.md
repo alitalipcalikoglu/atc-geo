@@ -82,3 +82,13 @@ A reload does not trust a file just because it opens: after metadata decodes, th
 ## Running without one
 
 Leave `MMDB_PATH` empty. IP classification, countries, currencies, time zones, phone numbers, distances and places all work; `/v1/ip/*` answers `503 DATABASE_UNAVAILABLE` for public addresses.
+
+## Noticing an old database
+
+MaxMind and DB-IP publish new files every week or month; an old file keeps answering but gets less accurate. `GET /ready` carries the state without failing readiness:
+
+```json
+{ "status": "ok", "ipDatabase": { "configured": true, "loaded": true, "builtAt": "2026-08-01T00:00:00.000Z", "ageDays": 74, "stale": true } }
+```
+
+`stale` turns true beyond `MMDB_MAX_AGE_DAYS` (default 60; `0` turns it off); `geo_database_stale` on `/metrics` is the same flag for an alert. Replace the file and call `POST /v1/database/reload` (or restart) to load it.
