@@ -24,7 +24,7 @@ Production with Docker (mount the database directory and the MMDB files):
 
 ```bash
 docker build -t atc-geo .
-docker run -p 3012:3012 -v geo-data:/data -v /var/lib/geo:/mmdb:ro -e MMDB_PATH=/mmdb/GeoLite2-City.mmdb --env-file .env atc-geo
+docker run -p 3012:3012 -v atc-geo-data:/data -v /var/lib/geo:/mmdb:ro -e MMDB_PATH=/mmdb/GeoLite2-City.mmdb --env-file .env atc-geo
 ```
 
 Tests and type check:
@@ -136,13 +136,13 @@ Accepts an inbound `X-Request-Id` unconditionally and logs it via Fastify's defa
 logging. Also parses an inbound `traceparent`, trusted only when `TRUST_PROXY=true` — the caller's
 trace-id is continued with a fresh span-id for this hop, both logged as `traceId`/`spanId` via
 `@atc-web/atc-service-core`'s `registerRequestContext`. See
-[OBSERVABILITY.md](../stack/docs/OBSERVABILITY.md).
+[OBSERVABILITY.md](../atc-stack/docs/OBSERVABILITY.md).
 
 ## Backup / restore
 
 Back up the database (place collections); the MMDB file is a vendor download, not this service's
 own state, and is not part of the backup. Use `stack backup`/`stack restore` from the workspace
-root (see `stack/docs/UPGRADE.md`) to do this consistently alongside the rest of the stack. On
+root (see `atc-stack/docs/UPGRADE.md`) to do this consistently alongside the rest of the stack. On
 every start, before applying a pending migration to an existing database, the service itself also
 snapshots the file to `DB_PATH.pre-v<N>-<timestamp>` (directory overridable with
 `DB_BACKUP_DIR`) — a manual last resort if `stack restore` is unavailable.

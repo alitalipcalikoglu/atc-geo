@@ -49,7 +49,7 @@ pm2 sendSignal SIGHUP geo      # reload the IP databases after replacing the fil
 
 ```bash
 docker build -t atc-geo .
-docker run -d -p 3012:3012 -v geo-data:/data -v /var/lib/geo:/mmdb:ro -e MMDB_PATH=/mmdb/GeoLite2-City.mmdb --env-file .env atc-geo
+docker run -d -p 3012:3012 -v atc-geo-data:/data -v /var/lib/geo:/mmdb:ro -e MMDB_PATH=/mmdb/GeoLite2-City.mmdb --env-file .env atc-geo
 ```
 
 ## Backups
