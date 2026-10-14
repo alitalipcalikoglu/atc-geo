@@ -10,6 +10,7 @@ import { GeoPoint } from '../geo/geo-point.js';
 import { ApiKeyAuth } from './api-key-auth.js';
 import { Schemas } from './schemas.js';
 import { Views } from './views.js';
+import { AuditMetrics } from '../audit-metrics.js';
 
 /** @typedef {import('../config.js').Config} Config */
 /** @typedef {import('fastify').FastifyInstance} FastifyInstance */
@@ -211,6 +212,7 @@ export class GeoApi {
         '# HELP geo_db_bytes Database size.',
         '# TYPE geo_db_bytes gauge',
         `geo_db_bytes ${this.db.sizeBytes()}`,
+        ...AuditMetrics.lines(this.audit),
         '# HELP geo_process_uptime_seconds Process uptime.',
         '# TYPE geo_process_uptime_seconds gauge',
         `geo_process_uptime_seconds ${process.uptime().toFixed(0)}`,

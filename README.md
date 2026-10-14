@@ -138,6 +138,8 @@ trace-id is continued with a fresh span-id for this hop, both logged as `traceId
 `@atc-web/atc-service-core`'s `registerRequestContext`. See
 [OBSERVABILITY.md](../atc-stack/docs/OBSERVABILITY.md).
 
+Audit forwarding is observable too: `audit_forward_enabled`, `audit_forward_events_total{result="recorded|sent|dropped|failed"}` and `audit_forward_pending`. A rising `dropped`, or a `pending` that does not drain, means audit events are being lost or delayed; alert on it.
+
 ## Backup / restore
 
 Back up the database (place collections); the MMDB file is a vendor download, not this service's
