@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: geo
+  title: atc-geo
   version: "1.1.0"
   description: >-
     IP geolocation, reference data (countries, currencies, time zones) and phone/distance helpers,
@@ -18,7 +18,7 @@ security:
 paths:
   /openapi.yaml:
     get:
-      operationId: geo.openapi
+      operationId: atc-geo.openapi
       summary: Download the canonical OpenAPI document
       description: Returns this service's repository-root OpenAPI 3.1 document byte-for-byte.
       security: []
@@ -31,7 +31,7 @@ paths:
 
   /health:
     get:
-      operationId: geo.health.check
+      operationId: atc-geo.health.check
       summary: Liveness check
       description: Always returns 200 once the process is accepting connections. No dependency checks.
       tags: [ops]
@@ -51,7 +51,7 @@ paths:
                 $ref: '#/components/schemas/HealthResponse'
   /ready:
     get:
-      operationId: geo.ready.check
+      operationId: atc-geo.ready.check
       summary: Readiness check
       description: >-
         Runs `db.ping()` and, when MMDB_PATH is configured, checks that the IP database is loaded
@@ -89,7 +89,7 @@ paths:
                 $ref: '#/components/schemas/ReadyResponse'
   /v1/info:
     get:
-      operationId: geo.info.get
+      operationId: atc-geo.info.get
       summary: Service identity and capabilities
       description: >-
         Registered outside the `/v1` authentication boundary despite its path: unauthenticated,
@@ -111,7 +111,7 @@ paths:
                 $ref: '#/components/schemas/InfoResponse'
   /metrics:
     get:
-      operationId: geo.metrics.get
+      operationId: atc-geo.metrics.get
       summary: Prometheus metrics
       description: >-
         Prometheus text exposition format: IP lookups by result (hit/miss/special), whether the IP
@@ -142,7 +142,7 @@ paths:
 
   /v1/ip/self:
     get:
-      operationId: geo.ip.lookupSelf
+      operationId: atc-geo.ip.lookupSelf
       summary: Look up the caller's own IP address
       description: >-
         Looks up `request.ip` (the client address Fastify resolves, honoring TRUST_PROXY). Same
@@ -166,7 +166,7 @@ paths:
           $ref: '#/components/responses/DatabaseUnavailable'
   /v1/ip/{ip}:
     get:
-      operationId: geo.ip.lookup
+      operationId: atc-geo.ip.lookup
       summary: Look up an IP address
       description: >-
         Resolves country, region, city, coordinates, time zone and (when ASN_MMDB_PATH is
@@ -204,7 +204,7 @@ paths:
           $ref: '#/components/responses/DatabaseUnavailable'
   /v1/ip/batch:
     post:
-      operationId: geo.ip.lookupBatch
+      operationId: atc-geo.ip.lookupBatch
       summary: Look up multiple IP addresses
       description: >-
         Two-layer size cap: the JSON schema allows up to 1000 items (`maxItems: 1000`) as an outer
@@ -255,7 +255,7 @@ paths:
 
   /v1/database:
     get:
-      operationId: geo.database.getInfo
+      operationId: atc-geo.database.getInfo
       summary: Current IP database status
       description: Whether a city/ASN database is loaded, its metadata, when it was loaded, and lookup counters since process start.
       tags: [database]
@@ -271,7 +271,7 @@ paths:
           $ref: '#/components/responses/RateLimited'
   /v1/database/reload:
     post:
-      operationId: geo.database.reload
+      operationId: atc-geo.database.reload
       summary: Reload the configured IP database file(s) from disk
       description: >-
         Re-reads MMDB_PATH/ASN_MMDB_PATH. Each candidate file is checksum-verified (when
@@ -299,7 +299,7 @@ paths:
 
   /v1/countries:
     get:
-      operationId: geo.countries.list
+      operationId: atc-geo.countries.list
       summary: List countries
       description: Optionally filtered by name/code prefix, continent, EU membership or currency.
       tags: [countries]
@@ -347,7 +347,7 @@ paths:
           $ref: '#/components/responses/RateLimited'
   /v1/countries/{code}:
     get:
-      operationId: geo.countries.get
+      operationId: atc-geo.countries.get
       summary: Get a country by code
       description: Looked up by alpha-2, alpha-3 or numeric code, case-insensitive.
       tags: [countries]
@@ -386,7 +386,7 @@ paths:
 
   /v1/currencies:
     get:
-      operationId: geo.currencies.list
+      operationId: atc-geo.currencies.list
       summary: List currencies
       description: Every currency used by at least one country in the reference table, sorted by ISO code.
       tags: [currencies]
@@ -419,7 +419,7 @@ paths:
           $ref: '#/components/responses/RateLimited'
   /v1/currencies/{code}:
     get:
-      operationId: geo.currencies.get
+      operationId: atc-geo.currencies.get
       summary: Get a currency by ISO 4217 code
       description: 404s unless the code is used by at least one country in the reference table (not every ISO 4217 code is accepted).
       tags: [currencies]
@@ -458,7 +458,7 @@ paths:
 
   /v1/timezones:
     get:
-      operationId: geo.timezones.list
+      operationId: atc-geo.timezones.list
       summary: List time zones
       description: Every IANA zone name Node's ICU knows plus every zone in the reference table (their union), optionally filtered.
       tags: [timezones]
@@ -501,7 +501,7 @@ paths:
           $ref: '#/components/responses/RateLimited'
   /v1/timezones/{tzPath}:
     get:
-      operationId: geo.timezones.get
+      operationId: atc-geo.timezones.get
       summary: Get a time zone by IANA name
       description: >-
         **Wildcard route caveat**: the real Fastify route is `GET /v1/timezones/*`, a wildcard that
@@ -551,7 +551,7 @@ paths:
 
   /v1/phone:
     get:
-      operationId: geo.phone.normalize
+      operationId: atc-geo.phone.normalize
       summary: Normalize a phone number to E.164
       description: >-
         National numbering plans are not modelled: validity only checks that the resolved calling
@@ -590,7 +590,7 @@ paths:
           $ref: '#/components/responses/RateLimited'
   /v1/phone/batch:
     post:
-      operationId: geo.phone.normalizeBatch
+      operationId: atc-geo.phone.normalizeBatch
       summary: Normalize multiple phone numbers
       description: >-
         Same two-layer size cap as `POST /v1/ip/batch`: JSON schema allows up to 1000 items
@@ -637,7 +637,7 @@ paths:
 
   /v1/distance:
     get:
-      operationId: geo.distance.compute
+      operationId: atc-geo.distance.compute
       summary: Great-circle distance and bearing between two points
       description: >-
         Haversine distance on a WGS-84 sphere (R = 6371.0088 km) between any two valid coordinates.
@@ -688,7 +688,7 @@ paths:
 
   /v1/collections:
     get:
-      operationId: geo.collections.list
+      operationId: atc-geo.collections.list
       summary: List place collections
       tags: [collections]
       x-required-role: read
@@ -717,7 +717,7 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
     post:
-      operationId: geo.collections.create
+      operationId: atc-geo.collections.create
       summary: Create a place collection
       tags: [collections]
       x-required-role: write
@@ -768,7 +768,7 @@ paths:
           $ref: '#/components/responses/RateLimited'
   /v1/collections/{name}:
     get:
-      operationId: geo.collections.get
+      operationId: atc-geo.collections.get
       summary: Get a place collection
       tags: [collections]
       x-required-role: read
@@ -799,7 +799,7 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
     patch:
-      operationId: geo.collections.patch
+      operationId: atc-geo.collections.patch
       summary: Update a place collection's description
       tags: [collections]
       x-required-role: write
@@ -844,7 +844,7 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
     delete:
-      operationId: geo.collections.delete
+      operationId: atc-geo.collections.delete
       summary: Delete a place collection and all its places
       tags: [collections]
       x-required-role: write
@@ -868,7 +868,7 @@ paths:
           $ref: '#/components/responses/RateLimited'
   /v1/collections/{name}/clear:
     post:
-      operationId: geo.collections.clear
+      operationId: atc-geo.collections.clear
       summary: Remove every place from a collection
       description: The collection itself is kept; only its places are removed.
       tags: [collections]
@@ -901,7 +901,7 @@ paths:
 
   /v1/collections/{name}/places:
     put:
-      operationId: geo.places.upsert
+      operationId: atc-geo.places.upsert
       summary: Insert or replace places in a collection, all or nothing
       description: >-
         Atomic: either every place in the request is applied, or (on a duplicate `id` within the
@@ -974,7 +974,7 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
     get:
-      operationId: geo.places.list
+      operationId: atc-geo.places.list
       summary: List places in a collection
       tags: [places]
       x-required-role: read
@@ -1019,7 +1019,7 @@ paths:
           $ref: '#/components/responses/RateLimited'
   /v1/collections/{name}/places/{id}:
     get:
-      operationId: geo.places.get
+      operationId: atc-geo.places.get
       summary: Get a place by id
       tags: [places]
       x-required-role: read
@@ -1065,7 +1065,7 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
     delete:
-      operationId: geo.places.delete
+      operationId: atc-geo.places.delete
       summary: Delete a place
       tags: [places]
       x-required-role: write
@@ -1104,7 +1104,7 @@ paths:
           $ref: '#/components/responses/RateLimited'
   /v1/collections/{name}/nearby:
     get:
-      operationId: geo.places.nearby
+      operationId: atc-geo.places.nearby
       summary: Places near a point, nearest first
       description: >-
         `radius` (km) defaults to `min(50, MAX_RADIUS_KM)` and must be between 0 (exclusive) and
@@ -1168,7 +1168,7 @@ paths:
 
   /v1/stats:
     get:
-      operationId: geo.stats.get
+      operationId: atc-geo.stats.get
       summary: Aggregate service statistics
       tags: [stats]
       x-required-role: read
@@ -1554,7 +1554,7 @@ components:
           description: geo's SQLite schema version (PRAGMA user_version).
         serviceCore:
           type: string
-          description: Version of the @atc-web/service-core package actually running.
+          description: Version of the @atc-web/atc-service-core package actually running.
 
     Point:
       type: object

@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import rateLimit from '@fastify/rate-limit';
 import Fastify from 'fastify';
-import { AuditClient } from '@atc-web/service-core/audit';
-import { createErrorHandler, jsonParser, registerInfo, registerOpenApi, registerProbes, registerRequestContext, requestOptions } from '@atc-web/service-core/fastify';
+import { AuditClient } from '@atc-web/atc-service-core/audit';
+import { createErrorHandler, jsonParser, registerInfo, registerOpenApi, registerProbes, registerRequestContext, requestOptions } from '@atc-web/atc-service-core/fastify';
 import { GeoError } from '../domain/errors.js';
 import { PlacesService } from '../domain/places-service.js';
 import { Reference } from '../domain/reference.js';
@@ -31,7 +31,7 @@ export class GeoApi {
    * @param {import('../db.js').Database} deps.db
    * @param {string} deps.version
    * @param {import('../types.js').Logger} [deps.logger]
-   * @param {import('@atc-web/service-core/audit').AuditClient} [deps.audit]
+   * @param {import('@atc-web/atc-service-core/audit').AuditClient} [deps.audit]
    */
   constructor({ config, audit, ipLookup, reference, phone, places, collections, placeStore, db, version, logger }) {
     this.config = config;
@@ -79,7 +79,7 @@ export class GeoApi {
     this.invalidateReady = invalidate;
     registerOpenApi(app, new URL('../../openapi.yaml', import.meta.url));
     registerInfo(app, {
-      service: 'geo',
+      service: 'atc-geo',
       version: this.version,
       capabilities: ['ip-lookup', 'phone-normalize', 'distance', 'place-search', 'manual-reload'],
       schemaVersion: this.db.schemaVersion,
@@ -118,7 +118,7 @@ export class GeoApi {
       return { items: b.ips.map((ip) => ({ ip, ...attempt(() => this.ipLookup.lookup(ip, l)) })) };
     });
     api.get('/database', read, async () => this.ipLookup.info());
-    api.post('/database/reload', { config: { audit: AuditClient.route('geo.database.reload', () => null, (_r, b) => ({ type: b?.city?.type ?? null })) }, ...write }, async () => {
+    api.post('/database/reload', { config: { audit: AuditClient.route('atc-geo.database.reload', () => null, (_r, b) => ({ type: b?.city?.type ?? null })) }, ...write }, async () => {
       const outcome = this.ipLookup.reload();
       this.invalidateReady(); // force the next /ready to re-check rather than serve a cached verdict from before the reload
       if (!outcome.ok) throw new GeoError('DATABASE_RELOAD_FAILED', `IP database failed to reload: ${outcome.error}`);
@@ -152,16 +152,16 @@ export class GeoApi {
     // ---- places
     const view = (/** @type {import('../types.js').CollectionRow} */ c, /** @type {Map<string, number>} */ counts) => Views.collection(c, counts.get(c.name) ?? 0);
     api.get('/collections', read, async () => { const counts = this.collections.counts(); return { items: this.collections.all().map((c) => view(c, counts)) }; });
-    api.post('/collections', { config: { audit: AuditClient.route('geo.collection.create', (_r, b) => ({ type: 'collection', id: b.collection.name })) }, ...write, schema: { body: Schemas.createCollection } }, async (request, reply) => {
+    api.post('/collections', { config: { audit: AuditClient.route('atc-geo.collection.create', (_r, b) => ({ type: 'collection', id: b.collection.name })) }, ...write, schema: { body: Schemas.createCollection } }, async (request, reply) => {
       const row = this.places.createCollection(/** @type {any} */ (request.body), request.apiKey.id);
       reply.header('location', `/v1/collections/${row.name}`);
       return reply.code(201).send({ collection: Views.collection(row, 0) });
     });
     api.get('/collections/:name', { ...read, schema: { params: Schemas.nameParams } }, async (request) => ({ collection: view(this.collections.require(name(request)), this.collections.counts()) }));
-    api.patch('/collections/:name', { config: { audit: AuditClient.route('geo.collection.update', (r) => ({ type: 'collection', id: /** @type {any} */ (r.params).name }), (r) => ({ patch: r.body })) }, ...write, schema: { params: Schemas.nameParams, body: Schemas.patchCollection } }, async (request) => ({ collection: view(this.places.updateCollection(name(request), /** @type {any} */ (request.body)), this.collections.counts()) }));
-    api.delete('/collections/:name', { config: { audit: AuditClient.route('geo.collection.delete', (r) => ({ type: 'collection', id: /** @type {any} */ (r.params).name })) }, ...write, schema: { params: Schemas.nameParams } }, async (request, reply) => { this.places.removeCollection(name(request)); return reply.code(204).send(); });
-    api.post('/collections/:name/clear', { config: { audit: AuditClient.route('geo.collection.clear', (r) => ({ type: 'collection', id: /** @type {any} */ (r.params).name }), (_r, b) => ({ removed: b?.removed })) }, ...write, schema: { params: Schemas.nameParams } }, async (request) => ({ removed: this.places.clear(name(request)) }));
-    api.put('/collections/:name/places', { config: { audit: AuditClient.route('geo.places.upsert', (r) => ({ type: 'collection', id: /** @type {any} */ (r.params).name }), (_r, b) => ({ created: b?.created, updated: b?.updated })) }, ...write, schema: { params: Schemas.nameParams, body: Schemas.upsertPlaces } }, async (request) => this.places.upsert(name(request), /** @type {{ places: any[] }} */ (request.body).places));
+    api.patch('/collections/:name', { config: { audit: AuditClient.route('atc-geo.collection.update', (r) => ({ type: 'collection', id: /** @type {any} */ (r.params).name }), (r) => ({ patch: r.body })) }, ...write, schema: { params: Schemas.nameParams, body: Schemas.patchCollection } }, async (request) => ({ collection: view(this.places.updateCollection(name(request), /** @type {any} */ (request.body)), this.collections.counts()) }));
+    api.delete('/collections/:name', { config: { audit: AuditClient.route('atc-geo.collection.delete', (r) => ({ type: 'collection', id: /** @type {any} */ (r.params).name })) }, ...write, schema: { params: Schemas.nameParams } }, async (request, reply) => { this.places.removeCollection(name(request)); return reply.code(204).send(); });
+    api.post('/collections/:name/clear', { config: { audit: AuditClient.route('atc-geo.collection.clear', (r) => ({ type: 'collection', id: /** @type {any} */ (r.params).name }), (_r, b) => ({ removed: b?.removed })) }, ...write, schema: { params: Schemas.nameParams } }, async (request) => ({ removed: this.places.clear(name(request)) }));
+    api.put('/collections/:name/places', { config: { audit: AuditClient.route('atc-geo.places.upsert', (r) => ({ type: 'collection', id: /** @type {any} */ (r.params).name }), (_r, b) => ({ created: b?.created, updated: b?.updated })) }, ...write, schema: { params: Schemas.nameParams, body: Schemas.upsertPlaces } }, async (request) => this.places.upsert(name(request), /** @type {{ places: any[] }} */ (request.body).places));
     api.get('/collections/:name/places', { ...read, schema: { params: Schemas.nameParams, querystring: Schemas.listQuery } }, async (request) => {
       const q = query(request);
       const n = name(request);
@@ -171,7 +171,7 @@ export class GeoApi {
       return { items: this.placeStore.list(n, limit, offset).map(PlacesService.view), total: this.placeStore.count(n), limit, offset };
     });
     api.get('/collections/:name/places/:id', { ...read, schema: { params: Schemas.placeParams } }, async (request) => ({ place: PlacesService.view(this.places.get(name(request), /** @type {{ id: string }} */ (request.params).id)) }));
-    api.delete('/collections/:name/places/:id', { config: { audit: AuditClient.route('geo.place.delete', (r) => ({ type: 'place', id: /** @type {any} */ (r.params).id }), (r) => ({ collection: /** @type {any} */ (r.params).name })) }, ...write, schema: { params: Schemas.placeParams } }, async (request, reply) => { this.places.remove(name(request), /** @type {{ id: string }} */ (request.params).id); return reply.code(204).send(); });
+    api.delete('/collections/:name/places/:id', { config: { audit: AuditClient.route('atc-geo.place.delete', (r) => ({ type: 'place', id: /** @type {any} */ (r.params).id }), (r) => ({ collection: /** @type {any} */ (r.params).name })) }, ...write, schema: { params: Schemas.placeParams } }, async (request, reply) => { this.places.remove(name(request), /** @type {{ id: string }} */ (request.params).id); return reply.code(204).send(); });
     api.get('/collections/:name/nearby', { ...read, schema: { params: Schemas.nameParams, querystring: Schemas.nearbyQuery } }, async (request) => {
       const q = query(request);
       /** @type {Record<string, string>} */ const filter = {};

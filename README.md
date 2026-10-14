@@ -1,4 +1,4 @@
-# geo
+# atc-geo
 
 Geo and reference lookups for the other services and your applications: IP address to country, city, coordinates, time zone and ASN from a MaxMind DB file read with a built-in reader (GeoLite2, DB-IP, IPinfo, GeoIP2), 249 countries with localized names, calling codes, currencies and time zones, currency symbols and decimals, zone offsets and DST right now, E.164 phone normalization, great-circle distance, and your own place collections with nearby search. HTTP only.
 
@@ -85,7 +85,7 @@ Environment only; see [.env.example](.env.example). Required: `GEO_API_KEYS`. IP
 
 ## Security notes
 
-- API keys: compared in constant time against every configured key (SHA-256 digest + `timingSafeEqual`, no early exit), so timing never reveals whether, or which, key matched (`@atc-web/service-core/auth`, `ApiKeyAuth`).
+- API keys: compared in constant time against every configured key (SHA-256 digest + `timingSafeEqual`, no early exit), so timing never reveals whether, or which, key matched (`@atc-web/atc-service-core/auth`, `ApiKeyAuth`).
 - Roles: `read`/`write`/`readwrite`, enforced per route (`ApiKeyAuth.require`); no per-collection scoping — any `read`/`write` key can reach every place collection.
 - MMDB checksum verification (Stage 10): when `MMDB_SHA256` / `ASN_MMDB_SHA256` is set, or a `<path>.sha256` sidecar file exists next to the database, the SHA-256 of the file's bytes is checked before it is parsed as an MMDB, on every load and reload; a mismatch rejects the candidate and keeps the previously loaded database serving. The env var takes precedence over the sidecar file when both are present. Checksum verification is optional and never blocks startup: with neither an env var nor a sidecar present, a database loads unverified as before. A freshly opened database is additionally validated with real lookups against known public IPs before it replaces the one currently serving; a candidate that fails either check never goes live.
 - Request bodies capped at `BODY_LIMIT` (default 2 MiB, sized for place uploads); `Cache-Control: no-store` on every response.
@@ -135,7 +135,7 @@ lookups are read-only and in-memory once loaded, which would scale independently
 Accepts an inbound `X-Request-Id` unconditionally and logs it via Fastify's default request
 logging. Also parses an inbound `traceparent`, trusted only when `TRUST_PROXY=true` — the caller's
 trace-id is continued with a fresh span-id for this hop, both logged as `traceId`/`spanId` via
-`@atc-web/service-core`'s `registerRequestContext`. See
+`@atc-web/atc-service-core`'s `registerRequestContext`. See
 [OBSERVABILITY.md](../stack/docs/OBSERVABILITY.md).
 
 ## Backup / restore

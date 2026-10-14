@@ -1,4 +1,4 @@
-import { Database as CoreDatabase } from '@atc-web/service-core/db';
+import { Database as CoreDatabase } from '@atc-web/atc-service-core/db';
 
 /** SQLite connection with schema migrations applied on open. Holds place collections only. */
 export class Database extends CoreDatabase {

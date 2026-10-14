@@ -15,13 +15,13 @@ One event per completed write request, `outcome: "success"` for 2xx, `outcome: "
 
 | Action | Request |
 |---|---|
-| `geo.database.reload` | `POST /v1/database/reload` |
-| `geo.collection.create` | `POST /v1/collections` |
-| `geo.collection.update` | `PATCH /v1/collections/:name` |
-| `geo.collection.delete` | `DELETE /v1/collections/:name` |
-| `geo.collection.clear` | `POST /v1/collections/:name/clear` |
-| `geo.places.upsert` | `PUT /v1/collections/:name/places` |
-| `geo.place.delete` | `DELETE /v1/collections/:name/places/:id` |
+| `atc-geo.database.reload` | `POST /v1/database/reload` |
+| `atc-geo.collection.create` | `POST /v1/collections` |
+| `atc-geo.collection.update` | `PATCH /v1/collections/:name` |
+| `atc-geo.collection.delete` | `DELETE /v1/collections/:name` |
+| `atc-geo.collection.clear` | `POST /v1/collections/:name/clear` |
+| `atc-geo.places.upsert` | `PUT /v1/collections/:name/places` |
+| `atc-geo.place.delete` | `DELETE /v1/collections/:name/places/:id` |
 
 ## Event shape
 
@@ -29,7 +29,7 @@ One event per completed write request, `outcome: "success"` for 2xx, `outcome: "
 {
   "id": "0f1a…",
   "at": "2026-09-17T10:00:00.000Z",
-  "action": "geo.database.reload",
+  "action": "atc-geo.database.reload",
   "outcome": "success",
   "actor": { "type": "apikey", "id": "console" },
   "target": { "type": "…", "id": "…" },

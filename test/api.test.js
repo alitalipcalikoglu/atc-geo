@@ -137,7 +137,7 @@ test('API: /v1/info', async (t) => {
   assert.equal(typeof body.schemaVersion, 'number');
   assert.equal(typeof body.serviceCore, 'string');
   assert.deepEqual(body, {
-    service: 'geo',
+    service: 'atc-geo',
     version: pkgVersion,
     apiVersion: 'v1',
     capabilities: ['ip-lookup', 'phone-normalize', 'distance', 'place-search', 'manual-reload'],

@@ -1,7 +1,7 @@
 import { Config } from './config.js';
-import { AuditClient } from '@atc-web/service-core/audit';
-import { Lifecycle } from '@atc-web/service-core/lifecycle';
-import { readServiceVersion } from '@atc-web/service-core/fastify';
+import { AuditClient } from '@atc-web/atc-service-core/audit';
+import { Lifecycle } from '@atc-web/atc-service-core/lifecycle';
+import { readServiceVersion } from '@atc-web/atc-service-core/fastify';
 import { Database } from './db.js';
 import { IpLookup } from './domain/ip-lookup.js';
 import { Phone } from './domain/phone.js';
