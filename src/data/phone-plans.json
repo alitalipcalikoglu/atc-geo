@@ -1,0 +1,16 @@
+{
+  "_comment": "National numbering plans for common countries: national significant number (after the calling code) by type, tried in order. Simplified from the ITU-T E.164 national plans; numbers matching no type are reported invalid for these countries. keepTrunkZero: the leading 0 is part of the number (Italy).",
+  "plans": [
+    {"countries": ["TR"], "types": [["toll-free", "^800\\d{7}$"], ["premium", "^900\\d{7}$"], ["shared-cost", "^444\\d{4}$"], ["mobile", "^5\\d{9}$"], ["fixed", "^[2-4]\\d{9}$"]]},
+    {"callingCode": "1", "types": [["toll-free", "^8(00|33|44|55|66|77|88)[2-9]\\d{6}$"], ["premium", "^900[2-9]\\d{6}$"], ["fixed-or-mobile", "^[2-9]\\d{2}[2-9]\\d{6}$"]]},
+    {"countries": ["GB", "GG", "JE", "IM"], "types": [["toll-free", "^80(0\\d{6,7}|8\\d{7})$"], ["premium", "^9[018]\\d{8}$"], ["shared-cost", "^8(4[2-5]|7[0-3])\\d{7}$"], ["voip", "^56\\d{8}$"], ["uan", "^3[0347]\\d{8}$"], ["mobile", "^7([1-57-9]\\d{8}|624\\d{6})$"], ["fixed", "^[12]\\d{8,9}$"]]},
+    {"countries": ["DE"], "types": [["toll-free", "^800\\d{7,12}$"], ["premium", "^900[13579]\\d{6}$"], ["mobile", "^1(5\\d{9,10}|6[023]\\d{7,8}|7\\d{8,9})$"], ["fixed", "^[2-9]\\d{4,12}$"]]},
+    {"countries": ["FR"], "types": [["toll-free", "^80\\d{7}$"], ["premium", "^8[1-9]\\d{7}$"], ["voip", "^9\\d{8}$"], ["mobile", "^[67]\\d{8}$"], ["fixed", "^[1-5]\\d{8}$"]]},
+    {"countries": ["NL"], "types": [["toll-free", "^800\\d{4,7}$"], ["premium", "^90[069]\\d{4,7}$"], ["voip", "^8[57]\\d{7}$"], ["mobile", "^6[1-58]\\d{7}$"], ["fixed", "^(1[0-35-9]|2[0-46-9]|3[0-8]|4[0-36-9]|5[0-35-9]|7\\d)\\d{7}$"]]},
+    {"countries": ["ES"], "types": [["toll-free", "^[89]00\\d{6}$"], ["premium", "^(80[3-7]|90[2-7])\\d{6}$"], ["mobile", "^(6\\d|7[1-4])\\d{7}$"], ["fixed", "^[89]\\d{8}$"]]},
+    {"countries": ["IT", "SM", "VA"], "keepTrunkZero": true, "types": [["toll-free", "^80[03]\\d{6}$"], ["premium", "^89\\d{6,7}$"], ["mobile", "^3\\d{8,9}$"], ["fixed", "^0\\d{5,10}$"]]},
+    {"countries": ["RU"], "types": [["toll-free", "^800\\d{7}$"], ["premium", "^809\\d{7}$"], ["mobile", "^9\\d{9}$"], ["fixed", "^[348]\\d{9}$"]]},
+    {"countries": ["KZ"], "types": [["toll-free", "^800\\d{7}$"], ["mobile", "^7[05-8]\\d{8}$"], ["fixed", "^7[1-4]\\d{8}$"]]},
+    {"countries": ["AZ"], "types": [["toll-free", "^88\\d{7}$"], ["mobile", "^(10|5[015]|60|7[07]|99)\\d{7}$"], ["fixed", "^(1[28]|2[1-9]|3\\d)\\d{7}$"]]}
+  ]
+}

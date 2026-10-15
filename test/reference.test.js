@@ -53,12 +53,12 @@ test('Reference: currencies and time zones through Intl', () => {
 
 test('Phone: E.164 normalisation and country resolution', () => {
   const p = new Phone(ref);
-  assert.deepEqual(p.normalize('+90 (532) 123 45 67'), { input: '+90 (532) 123 45 67', e164: '+905321234567', valid: true, reason: null, country: 'TR', countries: ['TR'], callingCode: '+90', national: '5321234567' });
+  assert.deepEqual(p.normalize('+90 (532) 123 45 67'), { input: '+90 (532) 123 45 67', e164: '+905321234567', valid: true, reason: null, type: 'mobile', country: 'TR', countries: ['TR'], callingCode: '+90', national: '5321234567' });
   assert.deepEqual([p.normalize('0532 123 45 67', { country: 'tr' }).e164, p.normalize('00 90 532 123 45 67').e164, p.normalize('532-123-4567', { country: 'TR' }).e164], ['+905321234567', '+905321234567', '+905321234567']);
   const us = p.normalize('+1 212 555 0100');
   assert.deepEqual([us.country, us.countries.slice(0, 2), us.callingCode, us.national], ['US', ['US', 'CA'], '+1', '2125550100']);
   assert.deepEqual([p.normalize('(212) 555-0100', { country: 'US' }).e164, p.normalize('1 212 555 0100', { country: 'US' }).e164, p.normalize('011 44 20 7946 0958', { country: 'US' }).e164], ['+12125550100', '+12125550100', '+442079460958']);
-  assert.deepEqual([p.normalize('+1 268 555 0100').country, p.normalize('+1 809 555 0100').country, p.normalize('+7 495 123 4567').country, p.normalize('+7 495 123 4567', { country: 'KZ' }).country], ['AG', 'DO', 'RU', 'KZ']);
+  assert.deepEqual([p.normalize('+1 268 555 0100').country, p.normalize('+1 809 555 0100').country, p.normalize('+7 495 123 4567').country, p.normalize('+7 495 123 4567', { country: 'KZ' }).country, p.normalize('+7 701 123 4567').country], ['AG', 'DO', 'RU', 'RU', 'KZ'], 'the plan that accepts the number wins over the hint');
   assert.deepEqual([p.normalize('+44 1481 700000').country, p.normalize('+44 1481 700000', { country: 'gg' }).country], ['GB', 'GG']);
   const short = p.normalize('+90 12');
   assert.deepEqual([short.valid, short.reason, short.e164], [false, 'E.164 numbers have 8 to 15 digits', '+9012']);
@@ -67,6 +67,30 @@ test('Phone: E.164 normalisation and country resolution', () => {
   assert.throws(() => p.normalize('+90 532 ABC'), (e) => e instanceof GeoError && e.code === 'INVALID_PHONE');
   assert.throws(() => p.normalize('   '), (e) => e instanceof GeoError && e.code === 'INVALID_PHONE');
   assert.throws(() => p.normalize('123', { country: 'ZZ' }), (e) => e instanceof GeoError && e.code === 'COUNTRY_NOT_FOUND');
+});
+
+test('Phone: national plans give the type and reject numbers outside the plan', () => {
+  const p = new Phone(ref);
+  /** @param {string} n @param {string} [country] */
+  const t = (n, country) => { const r = p.normalize(n, { country }); return [r.e164, r.valid, r.type, r.country]; };
+  assert.deepEqual(t('0212 555 12 12', 'TR'), ['+902125551212', true, 'fixed', 'TR']);
+  assert.deepEqual(t('+90 444 1 444'), ['+904441444', true, 'shared-cost', 'TR']);
+  assert.deepEqual(t('+90 800 211 00 00'), ['+908002110000', true, 'toll-free', 'TR']);
+  assert.deepEqual(t('+90 12 345 6789'), ['+90123456789', false, null, 'TR']);
+  assert.equal(p.normalize('+90 12 345 6789').reason, 'does not match the TR numbering plan');
+  assert.deepEqual(t('+90 532 123 45 6'), ['+90532123456', false, null, 'TR'], 'one digit short');
+  assert.deepEqual(t('+1 800 555 0100'), ['+18005550100', true, 'toll-free', 'US']);
+  assert.deepEqual(t('+1 212 155 0100'), ['+12121550100', false, null, 'US'], 'NANP exchange cannot start with 1');
+  assert.deepEqual(t('+44 7911 123456'), ['+447911123456', true, 'mobile', 'GB']);
+  assert.deepEqual(t('+49 151 23456789'), ['+4915123456789', true, 'mobile', 'DE']);
+  assert.deepEqual(t('+33 6 12 34 56 78'), ['+33612345678', true, 'mobile', 'FR']);
+  assert.deepEqual(t('+31 6 12345678'), ['+31612345678', true, 'mobile', 'NL']);
+  assert.deepEqual(t('+34 912 345 678'), ['+34912345678', true, 'fixed', 'ES']);
+  assert.deepEqual(t('06 1234 5678', 'IT'), ['+390612345678', true, 'fixed', 'IT'], 'Italy keeps the leading 0');
+  assert.deepEqual(t('+39 333 123 4567'), ['+393331234567', true, 'mobile', 'IT']);
+  assert.deepEqual(t('+7 727 123 4567'), ['+77271234567', true, 'fixed', 'KZ']);
+  assert.deepEqual(t('+994 50 123 45 67'), ['+994501234567', true, 'mobile', 'AZ']);
+  assert.deepEqual(t('+61 2 9876 5432'), ['+61298765432', true, 'unknown', 'AU'], 'no plan: E.164 length only');
 });
 
 test('GeoPoint: validation, distance, bearing, bounding box', () => {

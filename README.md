@@ -64,7 +64,7 @@ Errors are JSON: `{ "error": { "code", "message", "details?" } }`. `lang` (BCP 4
 | GET | `/v1/countries`, `/v1/countries/:code` | read | `q`, `continent`, `eu`, `currency`, `lang`; one country by alpha-2, alpha-3 or numeric code. |
 | GET | `/v1/currencies`, `/v1/currencies/:code` | read | Currencies in use with symbol, decimals, countries. |
 | GET | `/v1/timezones`, `/v1/timezones/:name` | read | `country`, `q`; one zone with current offset and DST state. |
-| GET / POST | `/v1/phone`, `/v1/phone/batch` | read | `number`, `country?` → E.164, country candidates, validity. |
+| GET / POST | `/v1/phone`, `/v1/phone/batch` | read | `number`, `country?` → E.164, country candidates, validity, number type (national plans for TR, NANP, GB, DE, FR, NL, ES, IT, RU, KZ, AZ). |
 | GET | `/v1/distance` | read | `from=lat,lng&to=lat,lng` → km, m, mi, bearing. |
 | GET / POST | `/v1/collections` | read / write | Collections with place counts; `{ name, description? }` → `201`. |
 | GET / PATCH / DELETE | `/v1/collections/:name` | read / write | One collection; description; delete with its places. |
@@ -103,7 +103,7 @@ src/
   geo/geo-point.js          coordinate validation, haversine, bearing, bounding boxes
   domain/ip-lookup.js       normalised geolocation over city/country and ASN databases, reload
   domain/reference.js       countries, currencies, time zones over data/countries.json + Intl
-  domain/phone.js           E.164 normalisation
+  domain/phone.js           E.164 normalisation, national plans from data/phone-plans.json
   domain/places-service.js  collections, all-or-nothing upserts, nearby search
   data/countries.json       249 rows: codes, continent, calling codes, currency, zones, EU
   store/                    CollectionStore, PlaceStore
@@ -117,7 +117,7 @@ examples/                   one walkthrough per feature
 
 - Geocoding and address normalization (street address to coordinates and back): needs a map dataset or a provider; call one from your application and store the result in a place collection if you need nearby search on it.
 - Time zone from coordinates: needs zone polygons. The IP lookup returns the zone when the database carries it; otherwise use the country's zones.
-- National phone numbering plans (operator prefixes, exact lengths): the service validates E.164 shape and country only.
+- National phone numbering plans beyond the common ones in `src/data/phone-plans.json` (Turkey, NANP, UK and Crown dependencies, Germany, France, the Netherlands, Spain, Italy, Russia, Kazakhstan, Azerbaijan): elsewhere the service validates E.164 shape and country only. The plans are simplified to number type and length; operator ranges, portability and whether a number is assigned are not known.
 - Spatial queries beyond radius search (polygons, routing): use PostGIS or a routing engine.
 
 ## Audit events
