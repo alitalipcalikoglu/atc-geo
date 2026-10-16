@@ -5,7 +5,6 @@ export class Schemas {
   static lang = { type: 'string', minLength: 2, maxLength: 35, pattern: '^[A-Za-z0-9-]+$' };
   static ip = { type: 'string', minLength: 2, maxLength: 64 };
   static limit = { type: 'string', pattern: '^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|1000)$' };
-  static offset = { type: 'string', pattern: '^(0|[1-9][0-9]{0,6})$' };
   static coord = { type: 'string', pattern: '^-?\\d{1,3}(\\.\\d+)?$' };
   static pair = { type: 'string', pattern: '^\\s*-?\\d{1,3}(\\.\\d+)?\\s*,\\s*-?\\d{1,3}(\\.\\d+)?\\s*$' };
 
@@ -33,7 +32,7 @@ export class Schemas {
   static upsertPlaces = Schemas.body(['places'], { places: { type: 'array', minItems: 1, maxItems: 100_000, items: Schemas.place } });
   static nameParams = { type: 'object', properties: { name: Schemas.name }, required: ['name'] };
   static placeParams = { type: 'object', properties: { name: Schemas.name, id: Schemas.id }, required: ['name', 'id'] };
-  static listQuery = { type: 'object', additionalProperties: false, properties: { limit: Schemas.limit, offset: Schemas.offset } };
+  static listQuery = { type: 'object', additionalProperties: false, properties: { limit: Schemas.limit, cursor: { type: 'string', minLength: 1, maxLength: 1200 } } };
   /** `?lat=&lng=&radius=&limit=&filter.<key>=v`. */
   static nearbyQuery = { type: 'object', additionalProperties: { type: 'string', maxLength: 200 }, required: ['lat', 'lng'], properties: { lat: Schemas.coord, lng: Schemas.coord, radius: { type: 'string', pattern: '^\\d{1,5}(\\.\\d+)?$' }, limit: { type: 'string', pattern: '^([1-9]|[1-9][0-9]|100)$' } } };
 }

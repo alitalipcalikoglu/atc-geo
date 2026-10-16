@@ -13,7 +13,7 @@ export class PlaceStore {
         ON CONFLICT (collection, id) DO UPDATE SET name = excluded.name, lat = excluded.lat, lng = excluded.lng, attrs = excluded.attrs, updated_at = excluded.updated_at`),
       exists: db.prepare(`SELECT 1 FROM places WHERE collection = ? AND id = ?`),
       get: db.prepare(`SELECT ${C} FROM places WHERE collection = ? AND id = ?`),
-      list: db.prepare(`SELECT ${C} FROM places WHERE collection = ? ORDER BY name, id LIMIT ? OFFSET ?`),
+      list: db.prepare(`SELECT ${C} FROM places WHERE collection = ? AND (name, id) > (?, ?) ORDER BY name, id LIMIT ?`),
       count: db.prepare(`SELECT COUNT(*) AS n FROM places WHERE collection = ?`),
       total: db.prepare(`SELECT COUNT(*) AS n FROM places`),
       delete: db.prepare(`DELETE FROM places WHERE collection = ? AND id = ?`),
@@ -34,9 +34,9 @@ export class PlaceStore {
     return /** @type {PlaceRow|undefined} */ (this.stmt.get.get(collection, id));
   }
 
-  /** @param {string} collection @param {number} limit @param {number} offset */
-  list(collection, limit, offset) {
-    return /** @type {PlaceRow[]} */ (this.stmt.list.all(collection, limit, offset));
+  /** Keyset page in (name, id) order; `after` is the last row of the previous page. @param {string} collection @param {number} limit @param {[string, string]} [after] */
+  list(collection, limit, after = ['', '']) {
+    return /** @type {PlaceRow[]} */ (this.stmt.list.all(collection, after[0], after[1], limit));
   }
 
   /** @param {string} collection */

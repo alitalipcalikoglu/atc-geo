@@ -57,6 +57,8 @@ None: the MMDB read path is synchronous and in-memory, nothing to retry. A manua
 `PUT /v1/collections/:name/places` upserts by place `id`, all-or-nothing per call (one bad row
 rejects the whole batch, nothing partially written). A database reload is naturally idempotent:
 reloading the same file twice leaves the same data loaded.
+`POST /v1/collections` and `POST /v1/collections/:name/clear` honour `Idempotency-Key` (core
+`Idempotency`, 24 h, per API key and caller): a repeat replays the first 2xx answer.
 
 ## Backup
 

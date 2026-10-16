@@ -69,11 +69,16 @@ Errors are JSON: `{ "error": { "code", "message", "details?" } }`. `lang` (BCP 4
 | GET / POST | `/v1/collections` | read / write | Collections with place counts; `{ name, description? }` → `201`. |
 | GET / PATCH / DELETE | `/v1/collections/:name` | read / write | One collection; description; delete with its places. |
 | POST | `/v1/collections/:name/clear` | write | Remove every place → `{ removed }`. |
-| PUT / GET | `/v1/collections/:name/places` | write / read | `{ places: [...] }` upsert → `{ created, updated, total }`; browse (`limit`, `offset`). |
+| PUT / GET | `/v1/collections/:name/places` | write / read | `{ places: [...] }` upsert → `{ created, updated, total }`; browse (`limit`, `cursor`). |
 | GET / DELETE | `/v1/collections/:name/places/:id` | read / write | One place; delete. |
 | GET | `/v1/collections/:name/nearby` | read | `lat`, `lng`, `radius` (km), `limit`, `filter.<key>=v` → nearest places with distance and bearing. |
 | GET | `/v1/stats` | read | Database info, counts, sizes. |
 | GET | `/metrics` | read | Prometheus text: lookups by result, database loaded and build epoch, collections, places, database size, uptime. |
+
+## Conventions
+
+- Lists answer `{ items, nextCursor }`; pass `nextCursor` back as `cursor`. Reference lists, collections and nearby results are complete (`nextCursor: null`); places page by name. Collection names and place ids are natural keys.
+- Collection creation and clear honour `Idempotency-Key`: a repeat with the same key (per API key and caller — the console's `X-Actor` counts — for 24 h) replays the first 2xx answer with `Idempotent-Replayed: true`; another body is `409 IDEMPOTENCY_MISMATCH`. Lookups and batch lookups are read-only.
 
 ## Examples
 

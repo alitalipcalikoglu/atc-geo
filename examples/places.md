@@ -48,7 +48,7 @@ Combine with an [IP lookup](ip-lookup.md) for a first guess of the visitor's pos
 ## Browse, read, delete
 
 ```bash
-gcurl "$GEO/v1/collections/branches/places?limit=50&offset=0"
+gcurl "$GEO/v1/collections/branches/places?limit=50"   # { items, total, nextCursor }; pass nextCursor back as &cursor=
 gcurl $GEO/v1/collections/branches/places/taksim
 gcurl -X DELETE $GEO/v1/collections/branches/places/taksim      # 204
 gcurl -X POST $GEO/v1/collections/branches/clear                # { "removed": 2 }

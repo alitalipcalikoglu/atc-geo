@@ -105,8 +105,13 @@ test('API: collections, places, nearby, stats, metrics', async (t) => {
   res = await app.inject({ method: 'PUT', url: '/v1/collections/branches/places', headers: bearer(WRITE_KEY), payload: { places: [{ id: 'x', name: 'X', lat: 95, lng: 0 }] } });
   assert.deepEqual([res.statusCode, json(res).error.code, json(res).error.details], [400, 'INVALID_PLACE', { index: 0 }]);
   assert.equal((await app.inject({ method: 'PUT', url: '/v1/collections/branches/places', headers: bearer(WRITE_KEY), payload: { places: [{ id: 'x', name: 'X', lat: 1, lng: 1, extra: 1 }] } })).statusCode, 400);
-  res = await app.inject({ url: '/v1/collections/branches/places?limit=2&offset=1', headers: bearer(READ_KEY) });
-  assert.deepEqual([json(res).total, json(res).items.map((/** @type {any} */ p) => p.id)], [4, ['besiktas', 'kadikoy']]);
+  res = await app.inject({ url: '/v1/collections/branches/places?limit=1', headers: bearer(READ_KEY) });
+  res = await app.inject({ url: `/v1/collections/branches/places?limit=2&cursor=${json(res).nextCursor}`, headers: bearer(READ_KEY) });
+  assert.deepEqual([json(res).total, json(res).items.map((/** @type {any} */ p) => p.id), typeof json(res).nextCursor], [4, ['besiktas', 'kadikoy'], 'string']);
+  res = await app.inject({ url: `/v1/collections/branches/places?limit=2&cursor=${json(res).nextCursor}`, headers: bearer(READ_KEY) });
+  assert.deepEqual([json(res).items.length, json(res).nextCursor], [1, null], 'the last page has no cursor');
+  res = await app.inject({ url: '/v1/collections/branches/places?cursor=bogus', headers: bearer(READ_KEY) });
+  assert.deepEqual([res.statusCode, json(res).error.code], [400, 'INVALID_CURSOR']);
   assert.equal(json(await app.inject({ url: '/v1/collections/branches/places/taksim', headers: bearer(READ_KEY) })).place.attrs.type, 'locker');
   res = await app.inject({ url: '/v1/collections/branches/nearby?lat=41.0082&lng=28.9784&radius=10&limit=2&filter.type=store', headers: bearer(READ_KEY) });
   assert.equal(res.statusCode, 200, res.body);

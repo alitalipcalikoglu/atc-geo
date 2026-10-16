@@ -333,8 +333,9 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [items]
+                required: [items, nextCursor]
                 properties:
+                  nextCursor: { type: 'null', description: Always null; the list is complete. }
                   items:
                     type: array
                     items:
@@ -405,8 +406,9 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [items]
+                required: [items, nextCursor]
                 properties:
+                  nextCursor: { type: 'null', description: Always null; the list is complete. }
                   items:
                     type: array
                     items:
@@ -485,8 +487,9 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [items]
+                required: [items, nextCursor]
                 properties:
+                  nextCursor: { type: 'null', description: Always null; the list is complete. }
                   items:
                     type: array
                     items:
@@ -705,8 +708,9 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [items]
+                required: [items, nextCursor]
                 properties:
+                  nextCursor: { type: 'null', description: Always null; the list is complete. }
                   items:
                     type: array
                     items:
@@ -719,6 +723,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
     post:
       operationId: atc-geo.collections.create
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       summary: Create a place collection
       tags: [collections]
       x-required-role: write
@@ -875,6 +881,7 @@ paths:
       tags: [collections]
       x-required-role: write
       parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
         - $ref: '#/components/parameters/CollectionName'
       responses:
         '200':
@@ -985,10 +992,10 @@ paths:
           in: query
           schema: { type: string, pattern: '^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|1000)$' }
           description: Default 50.
-        - name: offset
+        - name: cursor
           in: query
-          schema: { type: string, pattern: '^(0|[1-9][0-9]{0,6})$' }
-          description: Default 0.
+          schema: { type: string, minLength: 1, maxLength: 1200 }
+          description: Opaque `nextCursor` from the previous page (places are ordered by name, then id). A malformed cursor is `400 INVALID_CURSOR`.
       responses:
         '200':
           description: A page of places.
@@ -1001,15 +1008,14 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [items, total, limit, offset]
+                required: [items, total, nextCursor]
                 properties:
                   items:
                     type: array
                     items:
                       $ref: '#/components/schemas/PlaceView'
                   total: { type: integer, minimum: 0, description: Total places in the collection, independent of paging. }
-                  limit: { type: integer }
-                  offset: { type: integer }
+                  nextCursor: { type: [string, 'null'], description: Pass as `cursor` for the next page; null on the last page. }
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1147,8 +1153,9 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [from, radiusKm, total, items]
+                required: [from, radiusKm, total, items, nextCursor]
                 properties:
+                  nextCursor: { type: 'null', description: Always null; nearby answers one ranked page of up to `limit` places. }
                   from: { $ref: '#/components/schemas/Point' }
                   radiusKm: { type: number }
                   total: { type: integer, minimum: 0, description: Matches found within the radius, before `limit` is applied. }
@@ -1223,6 +1230,12 @@ components:
         `readwrite` always satisfies either). Required on every `/v1/*` route and on `/metrics`;
         `/health`, `/ready` and `/v1/info` are unauthenticated.
   parameters:
+    IdempotencyKeyHeader:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: "Optional. Repeats of this POST with the same key (per API key, 24 h) replay the first 2xx answer with `Idempotent-Replayed: true` instead of running again; the same key with another method, path or body is `409 IDEMPOTENCY_MISMATCH`, while the first still runs `409 IDEMPOTENCY_IN_PROGRESS`."
+      schema: { type: string, pattern: '^[A-Za-z0-9._:-]{8,255}$' }
     Lang:
       name: lang
       in: query
